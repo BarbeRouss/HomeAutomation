@@ -1,0 +1,34 @@
+version: '3'
+services:
+    zigbee2mqtt:
+        container_name: zigbee2mqtt
+        image: koenkk/zigbee2mqtt
+        volumes:
+            - ./zigbee2mqtt:/app/data
+            - /run/udev:/run/udev:ro
+        devices:
+            - /dev/ttyUSB0:/dev/ttyUSB0
+        ports:
+            - 8181:8080
+        privileged: true
+        environment:
+            - TZ=Europe/Amsterdam
+        restart: unless-stopped
+    mqtt:
+        image: eclipse-mosquitto
+        #ports:
+            #- 1883:1883 # Listen over socket. No need to forward to host as other container have a direct access
+            #- 9001:9001 # Listen over WebSocket
+            #- 8080:8080 # Listen over WebSocket
+        volumes:
+            - ./mosquitto:/mosquitto
+        restart: unless-stopped
+    hass:
+        image: homeassistant/home-assistant
+        ports:
+            - 8123:8123
+        volumes:
+            - ./hass-config:/config
+            - "/etc/localtime:/etc/localtime:ro"
+            - ./hass-config/.ssh:/root/.ssh
+        restart: unless-stopped
