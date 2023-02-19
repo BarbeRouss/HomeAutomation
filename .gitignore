@@ -1,3 +1,7 @@
 /hass-config
 /mosquitto
 /zigbee2mqtt
+/influxdb/data
+/Firmware-CC2652R
+grafana-config/grafana.db
+influxdb/config/influx-configs

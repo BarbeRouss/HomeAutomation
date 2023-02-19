@@ -16,8 +16,8 @@ services:
         restart: unless-stopped
     mqtt:
         image: eclipse-mosquitto
-        #ports:
-            #- 1883:1883 # Listen over socket. No need to forward to host as other container have a direct access
+        ports:
+            - 1883:1883 # Listen over socket. Mainly used inside the docker compose, but also via the smartgateway meter
             #- 9001:9001 # Listen over WebSocket
             #- 8080:8080 # Listen over WebSocket
         volumes:
@@ -32,3 +32,43 @@ services:
             - "/etc/localtime:/etc/localtime:ro"
             - ./hass-config/.ssh:/root/.ssh
         restart: unless-stopped
+    # hass:
+    #     build:
+    #         context: HomeAssistantRepository
+    #     ports:
+    #         - 8123:8123
+    #     volumes:
+    #         - ./hass-config:/config
+    #         - "/etc/localtime:/etc/localtime:ro"
+    #         - ./hass-config/.ssh:/root/.ssh
+    #     restart: unless-stopped
+    influxdb:
+        image: influxdb
+        ports:
+            - 8086:8086
+        volumes:
+            - ./influxdb/config:/etc/influxdb2
+            - ./influxdb/data:/var/lib/influxdb2
+        environment:
+            - DOCKER_INFLUXDB_INIT_MODE=setup
+            - DOCKER_INFLUXDB_INIT_USERNAME=Julien
+            - DOCKER_INFLUXDB_INIT_PASSWORD=CHANGEME
+            - DOCKER_INFLUXDB_INIT_ORG=Main
+            - DOCKER_INFLUXDB_INIT_BUCKET=HomeAssistant
+        restart: unless-stopped
+    grafana:
+        image: grafana/grafana-oss
+        ports:
+            - 3001:3000
+        volumes:
+            - ./grafana-config:/var/lib/grafana
+        restart: unless-stopped
+
+
+
+# mkdir data
+# ID=$(id -u)
+# sudo docker run -d -p 3000:3000 \
+# --name="grafana" \
+# --user $ID --volume "$PWD/data:/var/lib/grafana" \
+# grafana/grafana
